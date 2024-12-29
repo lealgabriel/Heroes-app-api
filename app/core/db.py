@@ -4,6 +4,12 @@ from sqlalchemy.orm import sessionmaker
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app import settings
+from sys import modules
+
+db_connection_str = settings.db_async_connection_str
+
+if "pytest" in modules:
+    db_connection_str = settings.db_async_test_connection_str
 
 async_engine = create_async_engine(
    settings.db_async_connection_str,
