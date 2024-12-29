@@ -42,3 +42,7 @@ class TimestampModel(SQLModel):
            "onupdate": text("current_timestamp(0)")
        }
    )
+   
+class StatusMessage(BaseModel):
+   status: bool
+   message: str
