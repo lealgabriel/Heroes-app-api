@@ -27,7 +27,7 @@ Uma API para gerenciar heróis, oferecendo funcionalidades de criação, leitura
 
 1. Clone o repositório:
    ```bash
-   git clone https://github.com/seu-usuario/heroes-api.git
+   git clone https://github.com/lealgabriel/Heroes-app-api
    cd heroes-api
    ```
 
