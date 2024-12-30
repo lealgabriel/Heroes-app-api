@@ -22,7 +22,7 @@ class HeroesCRUD:
 
     async def get(self, hero_id: str | UUID) -> Hero:
         statement = select(Hero).where(Hero.uuid == hero_id)
-        results = await self.session.execute(statement=statement)
+        results = await self.session.exec(statement=statement)
         hero = results.scalar_one_or_none()
 
         if hero is None:
@@ -46,7 +46,7 @@ class HeroesCRUD:
 
     async def delete(self, hero_id: str | UUID) -> bool:
         statement = delete(Hero).where(Hero.uuid == hero_id)
-        await self.session.execute(statement=statement)
+        await self.session.exec(statement=statement)
         await self.session.commit()
         return True
     

@@ -2,6 +2,7 @@ import pytest
 import pytest_asyncio
 import asyncio
 from httpx import AsyncClient
+from httpx._transports.asgi import ASGITransport
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlmodel import SQLModel
@@ -10,26 +11,29 @@ from app.core.config import settings
 from app.core.db import async_engine
 import os
 import json
+from typing import AsyncGenerator
+
 
 
 @pytest.fixture(scope="session")
 def event_loop():
-    loop = asyncio.get_event_loop()
+    loop = asyncio.new_event_loop()
     yield loop
     loop.close()
 
 
 @pytest_asyncio.fixture
 async def async_client():
+    transport = ASGITransport(app=app)      
     async with AsyncClient(
-        app=app,
-        base_url=f"http://{settings.api_v1_prefix}"
+        transport=transport,
+        base_url="http://test/api/v1"             
     ) as client:
         yield client
 
 
 @pytest_asyncio.fixture(scope="function")
-async def async_session() -> AsyncSession:
+async def async_session() -> AsyncGenerator[AsyncSession, None]:
     session = sessionmaker(
         async_engine, class_=AsyncSession, expire_on_commit=False
     )
@@ -39,6 +43,8 @@ async def async_session() -> AsyncSession:
             await conn.run_sync(SQLModel.metadata.create_all)
 
         yield s
+        
+        await s.close()
 
         async with async_engine.begin() as conn:
             await conn.run_sync(SQLModel.metadata.drop_all)
@@ -48,13 +54,15 @@ async def async_session() -> AsyncSession:
 
 @pytest.fixture(scope="function")
 def test_data() -> dict:
-    path = os.getenv('PYTEST_CURRENT_TEST')
-    path = os.path.join(*os.path.split(path)[:-1], "data", "data.json")
+    import os, json
 
-    if not os.path.exists(path):
-        path = os.path.join("data", "data.json")
+    
+    conf_dir = os.path.dirname(__file__)      
 
-    with open(path, "r") as file:
-        data = json.loads(file.read())
+   
+    data_path = os.path.join(conf_dir, "heroes", "data", "data.json")
+
+    with open(data_path, "r", encoding="utf-8") as file:
+        data = json.load(file)
 
     return data
