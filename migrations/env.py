@@ -8,12 +8,12 @@ from sqlmodel import SQLModel
 
 from app.heroes.models import Hero
 
-# Carrega a config do Alembic
+
 cfg = context.config
 if cfg.config_file_name is not None:
     fileConfig(cfg.config_file_name)
 
-# Metadata de todos os modelos
+
 target_metadata = SQLModel.metadata
 target_metadata.naming_convention = {
     "ix": "ix_%(column_0_label)s",
@@ -23,7 +23,7 @@ target_metadata.naming_convention = {
     "pk": "pk_%(table_name)s"
 }
 
-# Pega a URL definida no alembic.ini:
+
 url = cfg.get_main_option("sqlalchemy.url")
 
 print("Database URL:", url)
@@ -41,17 +41,17 @@ def run_migrations_offline() -> None:
 
 def run_migrations_online() -> None:
     """Executa migrações no modo online."""
-    # Lê config do alembic.ini
+    
     config_section = cfg.get_section(cfg.config_ini_section)
     config_section["sqlalchemy.url"] = url
     
-    # Cria engine síncrona
+    
     connectable = engine_from_config(
         config_section,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
-    # Conecta de forma síncrona
+    
     with connectable.connect() as connection:
         context.configure(connection=connection, target_metadata=target_metadata)
         with context.begin_transaction():
